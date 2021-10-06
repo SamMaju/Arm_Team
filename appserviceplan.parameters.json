@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appServicePlanSkuName": {
+            "value": "P1v2" 
+        },
+        "appServicePlanSkuTier": {
+            "value": "PremiumV2" 
+        },
+        "appServicePlanSkuSize": {
+            "value": "P1v2" 
+        },
+        "appServicePlanSkuFamily": {
+            "value": "Pv2" 
+        },
+        "appServicePlanSkuCapacity": {
+            "value": "1" 
+        },
+        "location": {
+            "value": "westeurope" 
+        },
+        "common": {
+            "value": "sep-team1" 
+        }
+    }
+}

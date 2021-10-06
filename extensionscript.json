@@ -1,0 +1,47 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "commandToExecute": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        }
+    },
+    "variables": {
+        "extensionName": "[concat(parameters('vmName'), '-loganalytics')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-03-01",
+            "name": "[concat(parameters('vmName'), '/', variables('extensionName'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[parameters('commandToExecute')]"
+                }
+            }
+        }
+    ],
+    "outputs": {
+        
+    }
+}

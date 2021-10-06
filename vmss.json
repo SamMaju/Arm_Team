@@ -1,0 +1,183 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vNetName": {
+      "type": "string",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "nicName": {
+      "type": "string",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "vmSku": {
+      "type": "string",
+      "defaultValue": "Standard_D2s_v3",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "vmssName": {
+      "type": "string",
+      "metadata": {
+        "description": "description"
+      },
+      "maxLength": 61
+    },
+    "instanceCount": {
+      "type": "int",
+      "metadata": {
+        "description": "description"
+      },
+      "defaultValue": 1,
+      "minValue": 1,
+      "maxValue": 100
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "commandToExecute": {
+      "type": "securestring",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "script": {
+      "type": "securestring",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "lbName": {
+       "type": "string",
+       "metadata": {
+            "description": "description"
+        }
+    },
+    "backendAddressPoolsName": {
+       "type": "string",
+       "metadata": {
+            "description": "description"
+        }
+    }
+  },
+  "variables": {
+    "extensionName": "[concat(parameters('vmssName'), '-init')]",
+    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Compute/virtualMachineScaleSets",
+      "name": "[parameters('vmssName')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2020-12-01",
+      "dependsOn": [
+      ],
+      "sku": {
+        "name": "[parameters('vmSku')]",
+        "capacity": "[parameters('instanceCount')]"
+      },
+      "properties": {
+        "overprovision": true,
+        "upgradePolicy": {
+          "mode": "Automatic"
+        },
+        "virtualMachineProfile": {
+          "storageProfile": {
+            "osDisk": {
+              "createOption": "FromImage",
+              "caching": "ReadWrite"
+            },
+            "imageReference": {
+              "publisher": "Canonical",
+              "offer": "UbuntuServer",
+              "sku": "18.04-LTS",
+              "version": "latest"
+            }
+          },
+          "osProfile": {
+            "computerNamePrefix": "[parameters('vmssName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "networkProfile": {
+            "networkInterfaceConfigurations": [
+              {
+                "name": "[parameters('nicName')]",
+                "properties": {
+                  "primary": true,
+                  "ipConfigurations": [
+                    {
+                      "name": "ipconfig1",
+                      "properties": {
+                        "subnet": {
+                          "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]"
+                        },
+                        "privateIPAddressVersion": "IPv4",
+                        "loadBalancerBackendAddressPools": [
+                            {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('lbName'), parameters('backendAddressPoolsName'))]"
+                            }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+      "apiVersion": "2019-03-01",
+      "name": "[concat(parameters('vmssName'),'/', variables('extensionName'))]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+          "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('vmssName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Azure.Extensions",
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.1",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "[parameters('script')]"
+          ]
+        },
+        "protectedSettings": {
+          "commandToExecute": "[parameters('commandToExecute')]",
+          "storageAccountName": "[parameters('storageAccountName')]",
+          "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"                
+        }
+      }
+    }
+  ]
+}

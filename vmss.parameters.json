@@ -1,0 +1,22 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vNetName": {
+            "value": "vnet-team-1-case-arm-we" 
+        },
+        "subnetName": {
+            "value": "vnet-team-1-case-arm-we-api-snet" 
+        },
+        "nicName": {
+            "value": "vmss-team-1-case-arm-we-api-nic" 
+        },
+        "vmssName": {
+            "value": "vmss-team-1-case-arm-we" 
+
+        },
+        "adminUsername": {
+            "value": "azureuser" 
+        }
+    }
+}

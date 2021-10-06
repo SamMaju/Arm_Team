@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "value": "vm-team-1-case-arm-we-db"
+        },
+        "vNetName": {
+            "value": "vnet-team-1-case-arm-we-db-snet"
+        },
+        "subnetName": {
+            "value": "value"
+        },
+        "adminUserName": {
+            "value": "azureuser"
+         },
+         "authenticationType": {
+            "value": "password"
+         },
+         "operatingSystem": {
+             "value": "UbuntuServer_18.04-LTS"
+         }
+    }
+}

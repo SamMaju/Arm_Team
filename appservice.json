@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "type": "String",
+      "defaultValue": "_MY_APP_NAME_"
+    },
+    "dockerImageName": {
+      "type": "String",
+      "defaultValue": "_MY_REGISTRY_USERNAME_-on.azurecr.io/_MY_NAMESPACE_/_MY_DOCKER_IMAGE_NAME_:latest"
+    },
+    "dockerRegistryUrl": {
+      "type": "String",
+      "defaultValue": "https://_MY_REGISTRY_USERNAME_-on.azurecr.io"
+    },
+    "dockerRegistryUsername": {
+      "type": "String",
+      "defaultValue": "_MY_REGISTRY_USERNAME_"
+    },
+    "dockerRegistryPassword": {
+      "type": "String",
+      "defaultValue": "_MY_REGISTRY_PSW_"
+    },
+    "servicePlanName": {
+      "type": "String",
+      "defaultValue": "_MY_SERVICE_PLAN_NAME_"
+    },
+    "apiServerValue": {
+      "type": "String",
+      "defaultValue": ""
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-01-15",
+      "name": "[parameters('appName')]",
+      "kind": "app,linux,container",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name": "[parameters('appName')]",
+        "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-team-1-case-arm-we', 'vnet-team-1-case-arm-we-fe-snet')]", //TODO
+
+        "httpsOnly": true,
+        "siteConfig": {
+          "vnetRouteAllEnabled": false,
+
+          "linuxFxVersion": "[concat('DOCKER|', parameters('dockerImageName'))]",
+          "alwaysOn": true,
+          "httpsOnly": false,
+
+          "appSettings": [
+            {
+              "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+              "value": "false"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_URL",
+              "value": "[parameters('dockerRegistryUrl')]"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+              "value": "[parameters('dockerRegistryUsername')]"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+              "value": "[parameters('dockerRegistryPassword')]"
+            },
+            {
+              "name": "APISERVER",
+              "value": "[parameters('apiServerValue')]"
+            }
+          ],
+          "ipSecurityRestrictions": [
+            {              
+              "vnetSubnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', 'vnet-team-1-case-arm-we', 'vnet-team-1-case-arm-we-agw-snet')]",
+              "action": "Allow",
+              "priority": 200,
+              "name": "backend-services"
+            }
+          ]
+        },
+        "serverFarmId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', parameters('servicePlanName'))]"
+      }
+    },
+  ]
+}

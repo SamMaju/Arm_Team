@@ -1,0 +1,171 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vNetName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "vNetPrefix": {
+           "type": "string",
+           "defaultValue": "10.10.0.0/16",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetBastionName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetBastionPrefix": {
+           "type": "string",
+           "defaultValue": "10.10.1.0/27",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetBackendTierName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetBackendTierPrefix": {
+           "type": "string",
+           "defaultValue": "10.10.2.0/24",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetBusinessTierName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetBusinessTierPrefix": {
+           "type": "string",
+           "defaultValue": "10.10.3.0/24",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetFrontendTierName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetFrontendTierPrefix": {
+           "type": "string",
+           "defaultValue": "10.10.4.0/27",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetAppGatewayTierName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetAppGatewayPrefix": {
+           "type": "string",
+           "defaultValue": "10.10.5.0/27",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetPrivateEndPointName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetPrivateEndpointPrefix": {
+           "type": "string",
+           "defaultValue": "10.10.6.0/27",
+           "metadata": {
+                "description": "description"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "routing": "lbi-routing"
+    },
+    "resources": [
+        {
+            "name": "[parameters('vNetName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-05-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[parameters('VNetName')]"
+            },
+            "dependsOn": [
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[parameters('vNetPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[parameters('subnetBastionName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetBastionPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[parameters('subnetBackendTierName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetBackendTierPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[parameters('subnetBusinessTierName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetBusinessTierPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[parameters('subnetFrontendTierName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetFrontendTierPrefix')]",
+                            "delegations": [
+                                {
+                                    "name": "[concat(parameters('subnetFrontendTierName'), '-webapp-delegation')]",
+                                    "properties": {
+                                        "serviceName": "Microsoft.Web/serverFarms",
+                                        "actions": [
+                                            "Microsoft.Network/virtualNetworks/subnets/action"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "[parameters('subnetAppGatewayTierName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetAppGatewayPrefix')]"
+                        }
+                    },
+                    {
+                        "name": "[parameters('subnetPrivateEndPointName')]",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnetPrivateEndpointPrefix')]",
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {}
+}

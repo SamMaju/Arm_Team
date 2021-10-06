@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subnetBastionName": {
+            "value": "bast-team-1-case-arm-we" 
+        },
+        "vNetName": {
+            "value": "vnet-team-1-case-arm-we"
+        },
+        "subnetBackendTierName": {
+            "value": "vnet-team-1-case-arm-we-bet-snet"
+        },
+        "subnetBusinessTierName": {
+            "value": "vnet-team-1-case-arm-we-bust-snet"
+        },
+        "subnetFrontendTierName": {
+            "value": "vnet-team-1-case-arm-we-fet-snet"
+        },
+        "subnetAppGatewayTierName": {
+            "value": "vnet-team-1-case-arm-we-appgw-snet"
+        },
+        "subnetPrivateEndPointName": {
+            "value": "vnet-team-1-case-arm-we-privep-snet"
+        }
+    }
+}

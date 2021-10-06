@@ -1,0 +1,531 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "createNetworkUrl": {
+            "type": "string",
+            "defaultValue":"monngodb.json"
+        },
+        "createBastionUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "createDbUri": {
+           "type": "string"
+        },
+        "createApiUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "storageAccountName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "dbScript": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "dbCommandToExecute": {
+           "type": "securestring",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "apiScript": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "apiCommandToExecute": {
+           "type": "securestring",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "adminPwdOrKey": {
+           "type": "securestring",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "createLbiUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "createAppServicePlanUri": {
+            "type": "string"
+        },
+        "createAppServiceUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "createAppGatewayUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "dockerRegistryUrl": {
+           "type": "string"
+        },
+        "dockerRegistryUsername": {
+           "type": "string"
+        },
+        "dockerRegistryPassword": {
+           "type": "string"
+        },
+        "secretName": {
+            "type": "securestring"
+        },
+        "secretValue": {
+            "type": "securestring"
+        },
+        "kvobjectid": {
+            "type": "securestring"
+        },
+        "createKeyVaultUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "createLogAnalyticsUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "createLogAgentDbUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "createNSGUri": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        }
+
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "name": "creatingNetwork",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createNetworkUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vNetName": {
+                        "value": "vnet-team-1-case-arm-we"
+                    },
+                    "vNetPrefix": {
+                        "value": "10.10.0.0/16"
+                    },
+                    "subnetBastionName": {
+                        "value": "AzureBastionSubnet"
+                    },
+                    "subnetBastionPrefix": {
+                        "value": "10.10.1.0/27"
+                    },
+                    "subnetBackendTierName": {
+                        "value": "vnet-team-1-case-arm-we-be-snet"
+                    },
+                    "subnetBackendTierPrefix": {
+                        "value": "10.10.2.0/24"
+                    },
+                    "subnetBusinessTierName": {
+                        "value": "vnet-team-1-case-arm-we-api-snet"
+                    },
+                    "subnetBusinessTierPrefix": {
+                        "value": "10.10.3.0/24"
+                    },
+                    "subnetFrontendTierName": {
+                        "value": "vnet-team-1-case-arm-we-fe-snet"
+                    },
+                    "subnetFrontendTierPrefix": {
+                        "value": "10.10.4.0/27"
+                    },
+                    "subnetAppGatewayTierName": {
+                        "value": "vnet-team-1-case-arm-we-agw-snet"
+                    },
+                    "subnetAppGatewayPrefix": {
+                        "value": "10.10.5.0/27"
+                    },
+                    "subnetPrivateEndPointName": {
+                        "value": "vnet-team-1-case-arm-we-pep-snet"
+                    },
+                    "subnetPrivateEndpointPrefix": {
+                        "value": "10.10.6.0/27"
+                    }
+                }
+            }
+        },
+        {
+            "name": "creatingBastion",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createBastionUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "bastionHostName": {
+                        "value": "bast-team-1-case-arm-we"
+                    },
+                    "vNetName": {
+                        "value": "vnet-team-1-case-arm-we"
+                    }
+                }
+            }
+        },
+        {
+            "name": "creatingDb",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createDbUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmName": {
+                        "value": "vm-team-1-case-arm-we-db"
+                    },
+                    "vNetName": {
+                        "value": "vnet-team-1-case-arm-we"
+                    },
+                    "subnetName": {
+                        "value": "vnet-team-1-case-arm-we-be-snet"
+                    },
+                    "adminUserName": {
+                        "value": "azureuser"
+                    },
+                    "operatingSystem": {
+                        "value": "UbuntuServer_18.04-LTS"
+                    },
+                    "script": {
+                        "value": "[parameters('dbScript')]"
+                    },
+                    "adminPwdOrKey": {
+                        "value": "[parameters('adminPwdOrKey')]"
+                    },
+                    "commandToExecute": {
+                        "value": "[parameters('dbCommandToExecute')]"
+                    },
+                    "storageAccountName": {
+                       "value": "[parameters('storageAccountName')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "creatingLbi",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createLbiUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "lbName": {
+                        "value": "lbi-team-1-case-arm-we-api"
+                    },
+                    "vNetName": {
+                        "value": "vnet-team-1-case-arm-we"
+                    },
+                    "subnetName": {
+                        "value": "vnet-team-1-case-arm-we-api-snet"
+                    }
+                }
+            }
+        },
+        {
+            "name": "creatingApi",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]",
+                "[resourceId('Microsoft.Resources/deployments', 'creatingDb')]",
+                "[resourceId('Microsoft.Resources/deployments', 'creatingLbi')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createApiUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "vmssName": {
+                        "value": "vmss-team-1-case-arm-we-api"
+                    },
+                    "vNetName": {
+                        "value": "vnet-team-1-case-arm-we"
+                    },
+                    "subnetName": {
+                        "value": "vnet-team-1-case-arm-we-api-snet"
+                    },
+                    "nicName": {
+                        "value": "vm-team-1-case-arm-we-api-nic"
+                    },
+                    "adminUserName": {
+                        "value": "azureuser"
+                    },
+                    "script": {
+                        "value": "[parameters('apiScript')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPwdOrKey')]"
+                    },
+                    "commandToExecute": {
+                        "value": "[parameters('apiCommandToExecute')]"
+                    },
+                    "storageAccountName": {
+                       "value": "[parameters('storageAccountName')]"
+                    },
+                    "lbName": {
+                        "value": "lbi-team-1-case-arm-we-api"
+                    },
+                    "backendAddressPoolsName": {
+                        "value": "lb-backend-pool-001"
+                    }
+                }
+            }
+        },
+        {
+            "name": "creatingAppServicePlan",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createAppServicePlanUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appServicePlanSkuName": {
+                        "value": "P1v2" 
+                    },
+                    "appServicePlanSkuTier": {
+                        "value": "PremiumV2" 
+                    },
+                    "appServicePlanSkuSize": {
+                        "value": "P1v2" 
+                    },
+                    "appServicePlanSkuFamily": {
+                        "value": "Pv2" 
+                    },
+                    "appServicePlanSkuCapacity": {
+                        "value": "1" 
+                    },
+                    "location": {
+                        "value": "eastus" 
+                    },
+                    "common": {
+                        "value": "sep-team1" 
+                    }
+                }
+            }
+        },
+        {
+            "name": "creatingAppService",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]",
+                "[resourceId('Microsoft.Resources/deployments', 'creatingAppServicePlan')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createAppServiceUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {                       
+                    "dockerImageName": {
+                        "value": "acr30239455.azurecr.io/ucn-casestudy/rating-web:v1"
+                    },
+                    "dockerRegistryUrl": {
+                        "value": "[concat('https://', parameters('dockerRegistryUrl'))]"
+                    },
+                    "dockerRegistryUsername": {
+                        "value": "[parameters('dockerRegistryUsername')]"
+                    },
+                    "dockerRegistryPassword": {
+                        "value": "[parameters('dockerRegistryPassword')]"
+                    },
+                    "servicePlanName": {
+                        "value": "sep-team1appserviceplan"
+                    },
+                    "appName": {
+                        "value": "teamSSJsepratingapp2"
+                    },
+                    "apiServerValue": {
+                        "value": "http://10.10.3.100"
+                    }
+                }
+            }
+        },
+        {
+            "name": "creatingKeyVault",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]",
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createKeyVaultUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {                       
+                    "secretName": {
+                        "value": "[parameters('secretName')]"
+                    },
+                    "secretValue": {
+                        "value": "[parameters('secretValue')]"
+                    },
+                    "objectId": {
+                        "value": "[parameters('kvobjectid')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "creatingLogAnalytics",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]",
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createLogAnalyticsUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {                       
+                    "workspaceName": {
+                        "value": "law-team-1-sep-case-arm-we"
+                    }
+                }
+            }
+        },
+        // {
+        //     "name": "creatingLogAgentDb",
+        //     "type": "Microsoft.Resources/deployments",
+        //     "apiVersion": "2021-04-01",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Resources/deployments', 'creatingLogAnalytics')]",
+        //         "[resourceId('Microsoft.Resources/deployments', 'creatingDb')]"
+        //     ],
+        //     "properties": {
+        //         "mode": "Incremental",
+        //         "templateLink": {
+        //             "uri": "[parameters('createLogAgentDbUri')]",
+        //             "contentVersion": "1.0.0.0"
+        //         },
+        //         "parameters": {                       
+        //             "vmName": {
+        //                 "value": "vm-team-1-case-arm-we-db"
+        //             },
+        //             "commandToExecute": {
+        //                 "value": "curl -sL \"https://raw.githubusercontent.com/Microsoft/OMS-Agent-for-Linux/master/installer/scripts/onboard_agent.sh\" -o onboard_agent.sh && sh onboard_agent.sh -w 860e038e-fc9e-4690-9c9c-be0263422953 -s vP7eYzx/MxY73KZ+5yUMjo4L/KnnmUPvWhzVKo7/0qpQPnPZPj9qTkNCk0dbJG0jtuPPZCZKjklRf09Dqczgvw== -d opinsights.azure.com"
+        //             }
+        //         }
+        //     }
+        // },
+        {
+            "name": "creatingNSG",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingNetwork')]",
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createNSGUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {                       
+
+                }
+            }
+        },
+        {
+            "name": "creatingAppGateway",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'creatingAppService')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[parameters('createAppGatewayUri')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {                       
+                    "vnetName": {
+                        "value": "vnet-team-1-case-arm-we" 
+                    },
+                    "appGatewayName": {
+                        "value": "Appgw-team-1-case-arm-we" 
+                    },
+                    "azureWebAppFQDN": {
+                        "value": "teamssjsepratingapp2.azurewebsites.net" 
+                    },
+                    "gatewaySubnetName": {
+                        "value": "vnet-team-1-case-arm-we-agw-snet" 
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
+
+
+        

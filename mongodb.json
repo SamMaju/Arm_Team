@@ -1,0 +1,202 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "adminUserName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            },
+            "defaultValue": "azureuser"
+        },
+        "authenticationType": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            },
+            "defaultValue": "password",
+            "allowedValues": [
+                "sshPublicKey",
+                "password"
+            ]
+        },
+        "adminPwdOrKey": {
+           "type": "securestring",
+           "metadata": {
+                "description": "description"
+            },
+            "defaultValue": ""
+        },
+        "vmSize": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            },
+            "defaultValue": "Standard_A1_v2"
+        },
+        "vNetName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "operatingSystem": {
+            "type": "string",
+            "metadata": {
+                    "description": "description"
+                },
+            "defaultValue": "UbuntuServer_18.04-LTS"
+        },
+        "script": {
+           "type": "securestring",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "storageAccountName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "commandToExecute": {
+            "type": "securestring",
+            "metadata": {
+                "description": "description"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "imageReference": {
+            "UbuntuServer_18.04-LTS": {
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "18.04-LTS",
+                "version": "latest"
+            },
+            "UbuntuServer_16.04-LTS": {
+                "publisher": "Canonical",
+                "offer": "UbuntuServer",
+                "sku": "16.04-LTS",
+                "version": "latest"
+            }
+        },
+        "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+                "publicKeys": [
+                    {
+                        "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                        "keyData": "[parameters('adminPwdOrKey')]"
+                    }
+                ]
+            }
+        },
+
+        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+
+        "extensionName": "[concat(parameters('vmName'), '-init')]",
+        "vmNicName": "[concat(parameters('vmName'), '-nic')]",
+        
+        "backendSubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]"
+
+    },
+    "resources": [
+        {
+            "name": "[variables('vmNicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-11-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "[variables('vmNicName')]"
+            },
+            "dependsOn": [
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipConfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "10.10.2.10",
+                            "subnet": {
+                                "id": "[variables('backendSubnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('vmName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-03-01",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNicName'))]"
+            ],
+            "tags": {
+                "displayName": "[parameters('vmName')]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUserName')]",
+                    "adminPassword": "[parameters('adminPwdOrKey')]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
+                "storageProfile": {
+                    "imageReference": "[variables('imageReference')[parameters('operatingSystem')]]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('vmNicName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-03-01",
+            "name": "[concat(parameters('vmName'), '/', variables('extensionName'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.1",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": [
+                        "[parameters('script')]"
+                    ]
+                },
+                "protectedSettings": {
+                    "commandToExecute": "[parameters('commandToExecute')]",
+                    "storageAccountName": "[parameters('storageAccountName')]",
+                    "storageAccountKey": "[listKeys(variables('storageAccountId'), '2019-04-01').keys[0].value]"
+                }
+            }
+        }
+    ]
+}

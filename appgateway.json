@@ -1,0 +1,183 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vnetName": {
+            "type": "string"
+        },
+        "appGatewayName": {
+            "type": "string"
+        },
+        "azureWebAppFQDN": {
+            "type": "string"
+        },
+        "gatewaySubnetName": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "gatewayIPAddressName": "[concat('pip', parameters('appGatewayName'))]",
+        "probeWebAppName": "[concat('probe-web', parameters('appGatewayName'))]",
+        "gatewayIPConfigName": "[concat('ipConf', parameters('appGatewayName'))]",
+        "backendWebAppPoolName": "[concat('bepool-WebApp', parameters('appGatewayName'))]",
+        "backendWebAppSettingsName": "[concat('setting-web', parameters('appGatewayName'))]",
+        "sslRouteRuleName": "[concat('routeRule', parameters('appGatewayName'))]",
+        "frontEndIPConfig": "[concat('fipConf', parameters('appGatewayName'))]",
+        "http80portName": "[concat('httpPort', parameters('appGatewayName'))]",
+        "httpListenerName": "[concat('httpListener', parameters('appGatewayName'))]",
+        "gatewayResID": "[resourceId('Microsoft.Network/applicationGateways', parameters('appGatewayName'))]"
+        
+    },
+    "resources": [
+        {
+            "comments": "The Public IP Address for the Application Gateway.",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "sku": {
+                "name": "Basic"
+            },
+            "name": "[variables('gatewayIPAddressName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().Location]",
+            "tags": {
+                "Project": "TAP-CaseStudy-Team1"
+            },
+            "properties": {
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Dynamic",
+                "idleTimeoutInMinutes": 4
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Application Gateway instance",
+            "type": "Microsoft.Network/applicationGateways",
+            "name": "[parameters('appGatewayName')]",
+            "apiVersion": "2017-10-01",
+            "location": "[resourceGroup().Location]",
+            "tags": {
+                "Project": "TAP-CaseStudy-Team1"
+            },
+            "scale": null,
+            "properties": {
+                "sku": {
+                    "name": "WAF_MEDIUM",
+                    "tier": "WAF",
+                    "capacity": 2
+                },
+                "gatewayIPConfigurations": [
+                    {
+                        "name": "[variables('gatewayIPConfigName')]",
+                        
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('gatewaySubnetName'))]"
+                            }
+                        }
+                    }
+                ],
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[variables('frontEndIPConfig')]",
+                        "properties": {
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('gatewayIPAddressName'))]"
+                            }
+                        }
+                    }
+                ],
+                "frontendPorts": [
+                    
+                    {
+                        "name": "[variables('http80portName')]",
+                        "properties": {
+                            "port": 80
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('backendWebAppPoolName')]",
+                        "properties": {
+                            "backendAddresses": [
+                                {
+                                    "fqdn": "[parameters('azureWebAppFQDN')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                
+                "probes": [
+                    {
+                        "name": "[variables('probeWebAppName')]",
+                        "properties": {
+                            "protocol": "Http",
+                            "path": "/",
+                            "interval": 30,
+                            "timeout": 120,
+                            "unhealthyThreshold": 3,
+                            "pickHostNameFromBackendHttpSettings": true
+                        }
+                    }
+                ],
+                "backendHttpSettingsCollection": [
+                    {
+                        "name": "[variables('backendWebAppSettingsName')]",
+                        "properties": {
+                            "port": 80,
+                            "protocol": "Http",
+                            "cookieBasedAffinity": "Disabled",
+                            "pickHostNameFromBackendAddress": true,
+                            "requestTimeout": 120,
+                            "probeEnabled": true,
+                            "probe": {
+                               "id":"[concat(variables('gatewayResID'),'/probes/',variables('probeWebAppName'))]" 
+                            }
+                            
+                            
+                        }
+                    }
+                ],
+                "httpListeners": [
+                   
+                    {
+                        "name": "[variables('httpListenerName')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(variables('gatewayResID'), '/frontendIPConfigurations/', variables('frontEndIPConfig'))]"
+                            },
+                            "frontendPort": {
+                                "id": "[concat(variables('gatewayResID'), '/frontendPorts/', variables('http80portName'))]"
+                            },
+                            "protocol": "Http",
+                            "requireServerNameIndication": false
+                        }
+                    }
+                ],
+                "requestRoutingRules": [
+                    {
+                        "name": "[variables('sslRouteRuleName')]",
+                        "properties": {
+                            "RuleType": "basic",
+                            "httpListener": {
+                                "id": "[concat(variables('gatewayResID'), '/httpListeners/', variables('httpListenerName'))]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[concat(variables('gatewayResID'), '/backendAddressPools/', variables('backendWebAppPoolName'))]"
+                            },
+                            
+                            "backendHttpSettings":{
+                                "id":"[concat(variables('gatewayResID'), '/backendHttpSettingsCollection/', variables('backendWebAppSettingsName'))]"
+                            }
+                        }
+                    }
+                ]
+            },
+            
+            "dependsOn": [
+                
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('gatewayIPAddressName'))]"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,75 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+
+        "appServicePlanSkuName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "appServicePlanSkuTier": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "appServicePlanSkuSize": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "appServicePlanSkuFamily": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "appServicePlanSkuCapacity": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "common": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
+        }
+        
+    },
+    "functions": [],
+    "variables": {
+        "appServicePlanName": "[concat(parameters('common'),'appserviceplan')]"
+    },
+    "resources": [
+        {
+  "type": "Microsoft.Web/serverfarms",
+  "apiVersion": "2019-08-01",
+  "name": "[variables('appServicePlanName')]",
+  "location": "[resourceGroup().location]",
+  "sku": {
+    "name": "[parameters('appServicePlanSkuName')]",
+    "tier": "[parameters('appServicePlanSkuTier')]",
+    "size": "[parameters('appServicePlanSkuSize')]",
+    "family": "[parameters('appServicePlanSkuFamily')]",
+    "capacity": "[parameters('appServicePlanSkuCapacity')]"
+  },
+  "kind": "linux",
+  "properties": {
+    "name": "[variables('appServicePlanName')]",
+    "reserved": true
+  }
+}
+    ],
+    "outputs": {}
+}

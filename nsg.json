@@ -1,0 +1,88 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    
+    },
+
+    "variables": {},
+
+    "resources": [
+            {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "nsg-team-1-sep-case-we-db",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2020-05-01",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH_IN",
+            "properties": {
+              "description": "Allows SSH traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+            {
+            "name": "MONGODB_IN",
+            "properties": {
+              "description": "Allows MongoDb traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "27017",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+          {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "nsg-team-1-sep-case-we-vmss",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2020-05-01",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH_IN",
+            "properties": {
+              "description": "Allows SSH traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+            {
+            "name": "MONGODB_IN",
+            "properties": {
+              "description": "Allows MongoDb traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 101,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+   ]
+}

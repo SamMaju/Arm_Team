@@ -1,0 +1,31 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        
+        "dockerImageName": {
+            "value": "acrsepteam.azurecr.io/ucn-casestudy/rating-web:v1"
+        },
+        "dockerRegistryUrl": {
+            "value": "https://acrsepteam.azurecr.io"
+        },
+        "dockerRegistryUsername": {
+            "value": "acrsepteam"
+        },
+        "dockerRegistryPassword": {
+            "value": "QZUvorE7+IE1SrcWj4DaKpDso8dNNGiw"
+        },
+        "appLocation": {
+            "value": "westeurope"
+        },
+        "servicePlanName": {
+            "value": "sep-team1appserviceplan"
+        },
+        "appName": {
+            "value": "teamSSJsepratingapp"
+        },
+        "apiServerValue": {
+            "value": "http://10.10.4.10"
+        }
+    }
+}

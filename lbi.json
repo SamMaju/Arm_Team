@@ -1,0 +1,119 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "lbName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "vNetName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        },
+        "subnetName": {
+           "type": "string",
+           "metadata": {
+                "description": "description"
+            }
+        }
+    },
+    "variables": {
+        "frontendIPConfigurationsName": "lb-fronted-ip-001",
+        "backendAddressPoolsName": "lb-backend-pool-001",
+        "loadBalancingRulesName": "lb-rule-001",
+        "probesName": "lb-probe-001"
+
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('lbName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                //"[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]",
+                //"[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('lbName'), variables('backendAddressPoolsName'))]"
+            ],
+            "sku": {
+                "name": "Basic",
+                "tier": "Regional"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "[variables('frontendIPConfigurationsName')]",
+                        "properties": {
+                            "privateIPAddress": "10.10.3.100",
+                            "privateIPAllocationMethod": "Static",
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vNetName'), parameters('subnetName'))]"
+                            },
+                            "privateIPAddressVersion": "IPv4"
+                        }//,
+                        // "zones": [
+                        //     "1",
+                        //     "2",
+                        //     "3"
+                        // ]
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "[variables('backendAddressPoolsName')]",
+                        "properties": {
+                            "loadBalancerBackendAddresses": [
+                                {
+                                    "name": "91301a4e-284b-44a1-b15c-ee279ba4b28f"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "[variables('loadBalancingRulesName')]",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/frontendIPConfigurations/',variables('frontendIPConfigurationsName'))]"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 4,
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "disableOutboundSnat": true,
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('lbName'), variables('backendAddressPoolsName'))]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('lbName')), '/probes/', variables('probesName'))]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "[variables('probesName')]",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 80,
+                            //"requestPath": "/",
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "outboundRules": [],
+                "inboundNatPools": []
+            }
+        }
+    ],
+    "outputs": {}
+}
